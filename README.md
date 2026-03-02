@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Healhub Frontend - Patient Booking Platform
 
 A modern, responsive React application for patients to discover doctors, hospitals, and book medical appointments.
@@ -42,7 +41,7 @@ A modern, responsive React application for patients to discover doctors, hospita
   - Save preferences
   - View booking history
 
-## � Application Flow
+## 🔄 Application Flow
 
 ### User Booking Flow
 
@@ -137,7 +136,7 @@ stateDiagram-v2
     DisplayList --> [*]: Exit
 ```
 
-## �📋 Prerequisites
+## ✅📋 Prerequisites
 
 - Node.js 14+
 - npm or yarn
