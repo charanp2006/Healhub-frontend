@@ -9,6 +9,7 @@ const Login = () => {
   const [state, setState] = useState("Sign up");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
 
   const navigate = useNavigate();
 
@@ -16,32 +17,40 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  const {backendURL, token, setToken} = useContext(AppContext);
+  const adminPageLink = import.meta.env.VITE_ADMIN_PAGE_LINK;
+  const demoAdminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const demoAdminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+  const demoUserEmail = import.meta.env.VITE_USER_EMAIL;
+  const demoUserPassword = import.meta.env.VITE_USER_PASSWORD;
+
+  const { backendURL, token, setToken } = useContext(AppContext);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-
-      if (state === 'Sign up') {
-        const {data} = await axios.post(`${backendURL}/api/user/register`, {
-          name, email, password
+      if (state === "Sign up") {
+        const { data } = await axios.post(`${backendURL}/api/user/register`, {
+          name,
+          email,
+          password,
         });
 
-        if(data.success){
+        if (data.success) {
           localStorage.setItem("token", data.token);
           setToken(data.token);
           toast.success("Account created successfully!");
         } else {
           toast.error(data.message);
         }
-      }else if (state === 'Login') {
-        const {data} = await axios.post(`${backendURL}/api/user/login`, {
-          email, password
+      } else if (state === "Login") {
+        const { data } = await axios.post(`${backendURL}/api/user/login`, {
+          email,
+          password,
         });
 
-        if(data.success){
+        if (data.success) {
           localStorage.setItem("token", data.token);
           setToken(data.token);
           toast.success("Welcome back!");
@@ -49,7 +58,6 @@ const Login = () => {
           toast.error(data.message);
         }
       }
-
     } catch (error) {
       console.log("Error in authentication", error);
       if (error.response?.data?.message) {
@@ -62,7 +70,6 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
-
   };
 
   // Clear password when switching modes
@@ -72,14 +79,21 @@ const Login = () => {
     setShowPassword(false);
   };
 
-  useEffect( () => {
-    if(token){
-      navigate('/');
+  const handleDemoToggle = () => {
+    setShowDemo((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/");
     }
-    },[token])
+  }, [token]);
 
   return (
-    <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center ">
+    <form
+      onSubmit={onSubmitHandler}
+      className="min-h-[80vh] flex items-center "
+    >
       <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-text-primaryLight text-sm shadow-lg bg-white">
         <p className="text-2xl font-semibold">
           {state === "Sign up" ? "Create Account" : "Welcome Back"}
@@ -88,21 +102,20 @@ const Login = () => {
           Please {state === "Sign up" ? "sign up" : "log in"} to book your
           appointment
         </p>
-        {
-          state === "Sign up" && (
-            <div className="w-full">
-              <p className="font-medium">Full Name</p>
-              <input
-                className="border border-border-light rounded w-full p-2.5 mt-1 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                type="text"
-                placeholder="Enter your full name"
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                required
-                disabled={loading}
-              />
-            </div>)
-          }
+        {state === "Sign up" && (
+          <div className="w-full">
+            <p className="font-medium">Full Name</p>
+            <input
+              className="border border-border-light rounded w-full p-2.5 mt-1 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              type="text"
+              placeholder="Enter your full name"
+              onChange={(e) => setName(e.target.value)}
+              value={name}
+              required
+              disabled={loading}
+            />
+          </div>
+        )}
         <div className="w-full">
           <p className="font-medium">Email</p>
           <input
@@ -147,21 +160,108 @@ const Login = () => {
               <Loader2 size={18} className="animate-spin" />
               {state === "Sign up" ? "Creating Account..." : "Signing in..."}
             </>
+          ) : state === "Sign up" ? (
+            "Create Account"
           ) : (
-            state === "Sign up" ? "Create Account" : "Login"
+            "Login"
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDemoToggle}
+          className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+        >
+          Demo credentials
         </button>
 
         {state === "Sign up" ? (
           <p>
-            Already have an account? <span onClick={()=>handleStateChange("Login")} className="text-primary underline cursor-pointer hover:text-primary/80">login here</span>
+            Already have an account?{" "}
+            <span
+              onClick={() => handleStateChange("Login")}
+              className="text-primary underline cursor-pointer hover:text-primary/80"
+            >
+              login here
+            </span>
           </p>
         ) : (
           <p>
-            Don't have an account? <span onClick={()=>handleStateChange("Sign up")} className="text-primary underline cursor-pointer hover:text-primary/80">create account here</span>
+            Don't have an account?{" "}
+            <span
+              onClick={() => handleStateChange("Sign up")}
+              className="text-primary underline cursor-pointer hover:text-primary/80"
+            >
+              create account here
+            </span>
           </p>
         )}
       </div>
+
+      {showDemo && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 px-4 py-6">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-800">
+                Demo Credentials
+              </p>
+              <button
+                type="button"
+                onClick={handleDemoToggle}
+                className="text-xs font-semibold text-gray-500 hover:text-gray-700"
+              >
+                Close
+              </button>
+            </div>
+            <div className="mt-4 space-y-4 text-xs text-gray-700">
+              <div>
+                <p className="font-medium text-gray-800">User Login</p>
+                <p>
+                  <span className="text-gray-600">Email:</span>{" "}
+                  <span className="font-mono text-gray-800">
+                    {demoUserEmail}
+                  </span>
+                </p>
+                <p>
+                  <span className="text-gray-600">Password:</span>{" "}
+                  <span className="font-mono text-gray-800">
+                    {demoUserPassword}
+                  </span>
+                </p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-800">Admin Login</p>
+                <p>
+                  <span className="text-gray-600">Email:</span>{" "}
+                  <span className="font-mono text-gray-800">
+                    {demoAdminEmail}
+                  </span>
+                </p>
+                <p>
+                  <span className="text-gray-600">Password:</span>{" "}
+                  <span className="font-mono text-gray-800">
+                    {demoAdminPassword}
+                  </span>
+                </p>
+                {adminPageLink ? (
+                  <a
+                    href={adminPageLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-flex text-xs font-semibold text-primary hover:text-primary/80"
+                  >
+                    Open Admin Console
+                  </a>
+                ) : (
+                  <p className="mt-2 text-xs text-gray-500">
+                    Admin console link not configured.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 };
